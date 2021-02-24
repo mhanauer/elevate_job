@@ -52,18 +52,33 @@ missing_results = data.frame(n_total, n_complete, percent_complete)
 missing_results
 ```
 Increase walking? and Decrease car dependency?
+var is the variable to subset and var_sub is the specific response option to subset on
+regularly
 ```{r}
 library(descr)
-count_fun(var, ){}
-dat_pre = subset(elevate_dat_analysis_complete, pre_post == "Pre" & regularly == "Walk in this area")
+count_fun = function(var, var_sub){
+dat_pre = subset(elevate_dat_analysis_complete, pre_post == "Pre" & var == var_sub)
 dat_pre
 
-dat_post = filter(elevate_dat_analysis_complete, pre_post == "Post" & regularly == "Walk in this area")
+dat_post = subset(elevate_dat_analysis_complete, pre_post == "Post" & var == var_sub)
 
 dat_count_p_change = round((dim(dat_post)[1] - dim(dat_pre)[1]) / dim(dat_pre)[1],2)
 
 dat_out = data.frame(n_pre = dim(dat_pre)[1], n_post = dim(dat_post)[1], p_change = dat_count_p_change)
-dat_out
+return(dat_out)
+}
+count_fun(elevate_dat_analysis_complete$regularly, "Walk in this area")
+```
+Get here
+```{r}
+count_fun(elevate_dat_analysis_complete$walk_future, "Walk")
+
+dat_pre = subset(elevate_dat_analysis_complete, pre_post == "Pre")
+mean(dat_pre$necess_car)
+
+dat_post = subset(elevate_dat_analysis_complete, pre_post == "Post")
+mean(dat_post$necess_car)
+
 ```
 
 
