@@ -1,0 +1,69 @@
+---
+title: "Test"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+Load in the data (read in the N/A)
+Figure out which variables you want to include
+Rename those variables
+Remove missing data and document how much was missing from what variables
+Check the descriptives to see if anything is out of range (i.e., different types of NAs)
+Match up the pre and post data
+Demographics
+Probably percentage change (maybe wilcox test)
+Then probably plug into an infographic
+
+Load in the data 
+```{r}
+setwd("~/Google Drive/Agenda/Jobs/evelvate_job_project")
+elevate_dat = read.csv("ElevateHiring_ElevateParkCentral_Community Survey.csv", na.strings = c("N/A", "NA", "na", "Na", "", " "))
+```
+Check out the differences in the start and end date
+Also check out the differneces in pre and post to make sure they are all pre and post
+```{r}
+library(prettyR)
+elevate_dat$Start.Date == elevate_dat$End.Date
+describe.factor(elevate_dat$Pre.Post)
+```
+Pick the variables you want, because naming them later will be annoying
+Check that the variable names match in the excel sheet and the pdf
+```{r}
+elevate_dat_analysis = elevate_dat  %>%
+  select(Respondent.ID, Pre.Post, Do.you.regularly., How.did.you.get.here.today.or.how.do.you.typically.get.to.the.area..Elevate.Park.., Please.rate.your.agreement.with.the.following.statement..I.will.WALK.in.this.area.more.often.in.the.future., Finish.this.sentence...I.would.walk.and.or.bike.in.this.area.more.if_______.., On.a.scale.of.1.to.5..how.necessary.is.it.to.have.a.car.to.get.around.this.area., On.a.scale.of.1.to.5..how.easy.is.it.to.get.to.the.businesses.and.services.in.this.area.for.individuals.who.are.not.driving., On.a.scale.of.1.to.5..how.safe.is.it.to.bike.in.this.area., How.often.do.you.visit.this.area..Elevate.Park.., Please.rate.your.agreement.with.the.following.statement..I.will.BIKE.in.this.area.more.often.in.the.future., Please.rate.your.agreement.with.the.following.statement..Pedestrian.safety.improvements.would.increase.community.connectedness.in.this.area., Please.rate.your.agreement.with.the.following.statement..I.feel.connected.to.the.community.in.this.area., On.a.scale.of.1.to.5..how.important.are.safe.ways.to.walk.and.bike..e.g..sidewalks..bike.lanes..to.your.physical.health., Do.you.identify.as., Please.select.your.age.range, Do.you.identify.as.)
+colnames(elevate_dat_analysis) =  c("id", "pre_post", "regularly", "get_here", "walk_future", "walk_bike_future_qual", "necess_car", "easy_no_car", "safe_bike", "visit_freq", "bike_future", "safe_comm_connect", "comm_connect", "physical_safe", "gender", "age")
+elevate_dat_analysis
+### Remove missing data only 7% missing
+elevate_dat_analysis_complete = na.omit(elevate_dat_analysis)
+elevate_dat_analysis_complete
+```
+Get the n's
+```{r}
+library(naniar)
+miss_var_summary(elevate_dat_analysis)
+
+n_total = dim(elevate_dat_analysis)[1]
+n_complete = dim(na.omit(elevate_dat_analysis))[1]
+percent_complete = round(n_complete / n_total,2)
+percent_complete
+missing_results = data.frame(n_total, n_complete, percent_complete)
+missing_results
+```
+Increase walking? and Decrease car dependency?
+```{r}
+library(descr)
+count_fun(var, ){}
+dat_pre = subset(elevate_dat_analysis_complete, pre_post == "Pre" & regularly == "Walk in this area")
+dat_pre
+
+dat_post = filter(elevate_dat_analysis_complete, pre_post == "Post" & regularly == "Walk in this area")
+
+dat_count_p_change = round((dim(dat_post)[1] - dim(dat_pre)[1]) / dim(dat_pre)[1],2)
+
+dat_out = data.frame(n_pre = dim(dat_pre)[1], n_post = dim(dat_post)[1], p_change = dat_count_p_change)
+dat_out
+```
+
+
