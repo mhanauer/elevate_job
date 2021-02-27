@@ -7,37 +7,47 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 Load in the data (read in the N/A)
-Figure out which variables you want to include
-Rename those variables
-Remove missing data and document how much was missing from what variables
-Check the descriptives to see if anything is out of range (i.e., different types of NAs)
-Match up the pre and post data
-Demographics
-Probably percentage change (maybe wilcox test)
-Then probably plug into an infographic
-
-Load in the data 
 ```{r}
 setwd("~/Google Drive/Agenda/Jobs/evelvate_job_project")
 elevate_dat = read.csv("ElevateHiring_ElevateParkCentral_Community Survey.csv", na.strings = c("N/A", "NA", "na", "Na", "", " "))
 ```
-Check out the differences in the start and end date
-Also check out the differneces in pre and post to make sure they are all pre and post
-```{r}
-library(prettyR)
-elevate_dat$Start.Date == elevate_dat$End.Date
-describe.factor(elevate_dat$Pre.Post)
-```
+
 Pick the variables you want, because naming them later will be annoying
 Check that the variable names match in the excel sheet and the pdf
 ```{r}
+
 elevate_dat_analysis = elevate_dat  %>%
-  select(Respondent.ID, Pre.Post, Do.you.regularly., How.did.you.get.here.today.or.how.do.you.typically.get.to.the.area..Elevate.Park.., Please.rate.your.agreement.with.the.following.statement..I.will.WALK.in.this.area.more.often.in.the.future., Finish.this.sentence...I.would.walk.and.or.bike.in.this.area.more.if_______.., On.a.scale.of.1.to.5..how.necessary.is.it.to.have.a.car.to.get.around.this.area., On.a.scale.of.1.to.5..how.easy.is.it.to.get.to.the.businesses.and.services.in.this.area.for.individuals.who.are.not.driving., On.a.scale.of.1.to.5..how.safe.is.it.to.bike.in.this.area., How.often.do.you.visit.this.area..Elevate.Park.., Please.rate.your.agreement.with.the.following.statement..I.will.BIKE.in.this.area.more.often.in.the.future., Please.rate.your.agreement.with.the.following.statement..Pedestrian.safety.improvements.would.increase.community.connectedness.in.this.area., Please.rate.your.agreement.with.the.following.statement..I.feel.connected.to.the.community.in.this.area., On.a.scale.of.1.to.5..how.important.are.safe.ways.to.walk.and.bike..e.g..sidewalks..bike.lanes..to.your.physical.health., Do.you.identify.as., Please.select.your.age.range, Do.you.identify.as.)
-colnames(elevate_dat_analysis) =  c("id", "pre_post", "regularly", "get_here", "walk_future", "walk_bike_future_qual", "necess_car", "easy_no_car", "safe_bike", "visit_freq", "bike_future", "safe_comm_connect", "comm_connect", "physical_safe", "gender", "age")
+  select(Respondent.ID, Pre.Post, Do.you.regularly., How.did.you.get.here.today.or.how.do.you.typically.get.to.the.area..Elevate.Park.., Please.rate.your.agreement.with.the.following.statement..I.will.WALK.in.this.area.more.often.in.the.future., Finish.this.sentence...I.would.walk.and.or.bike.in.this.area.more.if_______.., On.a.scale.of.1.to.5..how.necessary.is.it.to.have.a.car.to.get.around.this.area., On.a.scale.of.1.to.5..how.easy.is.it.to.get.to.the.businesses.and.services.in.this.area.for.individuals.who.are.not.driving., On.a.scale.of.1.to.5..how.safe.is.it.to.bike.in.this.area.,On.a.scale.of.1.to.5..how.safe.is.it.to.walk.in.this.area., How.often.do.you.visit.this.area..Elevate.Park.., Please.rate.your.agreement.with.the.following.statement..I.will.BIKE.in.this.area.more.often.in.the.future., Please.rate.your.agreement.with.the.following.statement..Pedestrian.safety.improvements.would.increase.community.connectedness.in.this.area., Please.rate.your.agreement.with.the.following.statement..I.feel.connected.to.the.community.in.this.area., On.a.scale.of.1.to.5..how.important.are.safe.ways.to.walk.and.bike..e.g..sidewalks..bike.lanes..to.your.physical.health., Do.you.identify.as., Please.select.your.age.range, Do.you.have.access.to.a.car.that.you.can.use.to.drive.yourself.places.)
+colnames(elevate_dat_analysis) =  c("id", "pre_post", "regularly", "get_here", "walk_future", "walk_bike_future_qual", "necess_car", "easy_no_car", "safe_bike", "safe_walk", "visit_freq", "bike_future", "safe_comm_connect", "comm_connect", "physical_safe", "gender", "age", "access")
 elevate_dat_analysis
 ### Remove missing data only 7% missing
 elevate_dat_analysis_complete = na.omit(elevate_dat_analysis)
 elevate_dat_analysis_complete
+
+elevate_dat_analysis_complete = elevate_dat_analysis_complete %>%
+   mutate(walk_future = case_when(walk_future == "Strongly disagree"~ "1", 
+          walk_future == "Disagree" ~ "2",
+          walk_future == "Agree" ~  "3",
+          walk_future == "Strongly agree" ~ "4")) %>%
+  mutate(walk_future = as.numeric(walk_future)) %>%
+  mutate(bike_future = case_when(bike_future == "Strongly disagree"~ "1", 
+                               bike_future == "Disagree" ~ "2",
+                               bike_future == "Agree" ~  "3",
+                               bike_future == "Strongly agree" ~ "4")) %>%
+  mutate(bike_future = as.numeric(bike_future)) %>%
+  mutate(safe_comm_connect = case_when(safe_comm_connect == "Strongly disagree"~ "1", 
+                               safe_comm_connect == "Disagree" ~ "2",
+                               safe_comm_connect == "Agree" ~  "3",
+                               safe_comm_connect == "Strongly agree" ~ "4")) %>%
+  mutate(safe_comm_connect = as.numeric(safe_comm_connect)) %>%
+  mutate(comm_connect = case_when(comm_connect == "Strongly disagree"~ "1", 
+                                     comm_connect == "Disagree" ~ "2",
+                                     comm_connect == "Agree" ~  "3",
+                                     comm_connect == "Strongly agree" ~ "4")) %>%
+  mutate(comm_connect = as.numeric(comm_connect))
+  
+
+
 ```
 Get the n's
 ```{r}
@@ -48,37 +58,228 @@ n_total = dim(elevate_dat_analysis)[1]
 n_complete = dim(na.omit(elevate_dat_analysis))[1]
 percent_complete = round(n_complete / n_total,2)
 percent_complete
-missing_results = data.frame(n_total, n_complete, percent_complete)
+n_pre = dim(subset(elevate_dat_analysis_complete, pre_post == "Pre"))[1]
+n_pre
+n_post = dim(subset(elevate_dat_analysis_complete, pre_post == "Post"))[1]
+missing_results = data.frame(n_total, n_complete, percent_complete, n_pre, n_post)
 missing_results
+
 ```
-Increase walking? and Decrease car dependency?
-var is the variable to subset and var_sub is the specific response option to subset on
-regularly
+#######################
+Increase walking?
+######################
+regularly and get here combining, because cannot get percentage change, because post get here is zero
 ```{r}
 library(descr)
-count_fun = function(var, var_sub){
-dat_pre = subset(elevate_dat_analysis_complete, pre_post == "Pre" & var == var_sub)
-dat_pre
+dat_pre = subset(elevate_dat_analysis_complete, pre_post == "Pre" & regularly == "Walk in this area" | get_here == "Walk")
+### Check you are right
+dat_pre %>%
+  select(pre_post, regularly, get_here)
 
-dat_post = subset(elevate_dat_analysis_complete, pre_post == "Post" & var == var_sub)
+dat_post = subset(elevate_dat_analysis_complete, pre_post == "Post" & regularly == "Walk in this area" | get_here == "Walk")
 
 dat_count_p_change = round((dim(dat_post)[1] - dim(dat_pre)[1]) / dim(dat_pre)[1],2)
 
 dat_out = data.frame(n_pre = dim(dat_pre)[1], n_post = dim(dat_post)[1], p_change = dat_count_p_change)
-return(dat_out)
-}
-count_fun(elevate_dat_analysis_complete$regularly, "Walk in this area")
-```
-Get here
-```{r}
-count_fun(elevate_dat_analysis_complete$walk_future, "Walk")
+dat_out
 
+```
+3. Please rate your agreement with the following statement: I will WALK in this area more often in the future.
+walk_future 
+```{r}
 dat_pre = subset(elevate_dat_analysis_complete, pre_post == "Pre")
-mean(dat_pre$necess_car)
+pre_walk_future = mean(dat_pre$walk_future)
 
 dat_post = subset(elevate_dat_analysis_complete, pre_post == "Post")
-mean(dat_post$necess_car)
+post_walk_future = mean(dat_post$walk_future)
+
+dat_out = data.frame(pre_walk_future, post_walk_future, p_change_walk_future = (post_walk_future-pre_walk_future)/pre_walk_future)
+dat_out = round(dat_out, 2)
+dat_out
 
 ```
+#####################
+Decrease car dependency?
+######################
+1. How did you get here today or how do you typically get to the area (Elevate Park)?: car 
+Not including taxi/rideshare as only two people were included
+Remove those who do not have access to a car 
+```{r}
+dat_pre = subset(elevate_dat_analysis_complete, pre_post == "Pre" & get_here == "Private car" & access == "Yes")
+dat_pre %>%
+  select(pre_post, get_here, access)
 
+dat_post = subset(elevate_dat_analysis_complete, pre_post == "Post" & get_here == "Private car" & access == "Yes")
+
+dat_count_p_change = round((dim(dat_post)[1] - dim(dat_pre)[1]) / dim(dat_pre)[1],2)
+
+dat_out = data.frame(n_pre = dim(dat_pre)[1], n_post = dim(dat_post)[1], p_change = dat_count_p_change)
+dat_out
+
+```
+2. On a scale of 1 to 5, how necessary is it to have a car to get around this area?
+necess_car
+```{r}
+dat_pre = subset(elevate_dat_analysis_complete, pre_post == "Pre")
+pre_necess_car = mean(dat_pre$necess_car)
+
+dat_post = subset(elevate_dat_analysis_complete, pre_post == "Post")
+post_necess_car = mean(dat_post$necess_car)
+
+dat_out = data.frame(pre_necess_car, post_necess_car, p_change_necess_car = (post_necess_car-pre_necess_car)/pre_necess_car)
+dat_out = round(dat_out, 2)
+dat_out
+
+```
+3. On a scale of 1 to 5, how easy is it to get to the businesses and services in this area for individuals who are not driving?
+easy_no_car
+```{r}
+
+dat_pre = subset(elevate_dat_analysis_complete, pre_post == "Pre")
+pre_easy_no_car = mean(dat_pre$easy_no_car)
+
+dat_post = subset(elevate_dat_analysis_complete, pre_post == "Post")
+post_easy_no_car = mean(dat_post$easy_no_car)
+
+dat_out = data.frame(pre_easy_no_car, post_easy_no_car, p_change_easy_no_car = (post_easy_no_car-pre_easy_no_car)/pre_easy_no_car)
+dat_out = round(dat_out, 2)
+dat_out
+
+```
+#####################
+Increase the perception of safety?
+#######################
+On.a.scale.of.1.to.5..how.safe.is.it.to.walk.in.this.area.	
+safe_walk
+```{r}
+dat_pre = subset(elevate_dat_analysis_complete, pre_post == "Pre")
+pre_safe_walk = mean(dat_pre$safe_walk)
+
+dat_post = subset(elevate_dat_analysis_complete, pre_post == "Post")
+post_safe_walk = mean(dat_post$safe_walk)
+
+dat_out = data.frame(pre_safe_walk, post_safe_walk, p_change_safe_walk = (post_safe_walk-pre_safe_walk)/pre_safe_walk)
+dat_out = round(dat_out, 2)
+dat_out
+
+```
+On.a.scale.of.1.to.5..how.safe.is.it.to.bike.in.this.area.	
+safe_bike
+```{r}
+dat_pre = subset(elevate_dat_analysis_complete, pre_post == "Pre")
+pre_safe_bike = mean(dat_pre$safe_bike)
+
+dat_post = subset(elevate_dat_analysis_complete, pre_post == "Post")
+post_safe_bike = mean(dat_post$safe_bike)
+
+dat_out = data.frame(pre_safe_bike, post_safe_bike, p_change_safe_bike = (post_safe_bike-pre_safe_bike)/pre_safe_bike)
+dat_out = round(dat_out, 2)
+dat_out
+
+```
+######################
+Increase access to community sites?
+###########################
+1. How often do you visit this area?
+visit_freq
+Percentage change in the number of people of how said they were coming daily, weekly, or monthly pre and post
+```{r}
+describe.factor(elevate_dat_analysis_complete$visit_freq)
+dat_pre = subset(elevate_dat_analysis_complete, pre_post == "Pre" & (visit_freq == "Daily" | visit_freq == "Weekly" | visit_freq ==  "Monthly"))
+dat_pre %>%
+  select(visit_freq, pre_post)
+
+describe.factor(elevate_dat_analysis_complete$visit_freq)
+dat_post = subset(elevate_dat_analysis_complete, pre_post == "Post" & ( visit_freq == "Daily" | visit_freq == "Weekly" | visit_freq ==  "Monthly"))
+
+dat_count_p_change = round((dim(dat_post)[1] - dim(dat_pre)[1]) / dim(dat_pre)[1],2)
+
+dat_out = data.frame(n_pre = dim(dat_pre)[1], n_post = dim(dat_post)[1], p_change = dat_count_p_change)
+dat_out
+
+```
+2. Please rate your agreement with the following statements:
+I will walk  in this area more often in the future and
+I will bike in this area more often in the future. 
+2. An average score across the measures, then pre and post average (1 to 4) scores and percentage change in pre and post scores
+```{r}
+dat_pre = subset(elevate_dat_analysis_complete, pre_post == "Pre")
+pre_walk_bike_future = mean(apply(dat_pre[c("bike_future", "walk_future")], 2, mean))
+
+dat_post = subset(elevate_dat_analysis_complete, pre_post == "Post")
+post_walk_bike_future = mean(apply(dat_post[c("bike_future", "walk_future")], 2, mean))
+
+dat_out = data.frame(pre_walk_bike_future, post_walk_bike_future, p_change_walk_bike_future = (post_walk_bike_future-pre_walk_bike_future)/pre_walk_bike_future)
+dat_out = round(dat_out, 2)
+dat_out
+
+```
+#################################
+Increase community connectedness?
+#################################
+Please.rate.your.agreement.with.the.following.statement..Pedestrian.safety.improvements.would.increase.community.connectedness.in.this.area.
+safe_comm_connect
+```{r}
+dat_pre = subset(elevate_dat_analysis_complete, pre_post == "Pre")
+pre_safe_comm_connect = mean(dat_pre$safe_comm_connect)
+
+dat_post = subset(elevate_dat_analysis_complete, pre_post == "Post")
+post_safe_comm_connect = mean(dat_post$safe_comm_connect)
+
+dat_out = data.frame(pre_safe_comm_connect, post_safe_comm_connect, p_change_safe_comm_connect = (post_safe_comm_connect-pre_safe_comm_connect)/pre_safe_comm_connect)
+dat_out = round(dat_out, 2)
+dat_out
+
+```
+Please.rate.your.agreement.with.the.following.statement..I.feel.connected.to.the.community.in.this.area.
+comm_connect
+```{r}
+dat_pre = subset(elevate_dat_analysis_complete, pre_post == "Pre")
+pre_comm_connect = mean(dat_pre$comm_connect)
+
+dat_post = subset(elevate_dat_analysis_complete, pre_post == "Post")
+post_comm_connect = mean(dat_post$comm_connect)
+
+dat_out = data.frame(pre_comm_connect, post_comm_connect, p_change_comm_connect = (post_comm_connect-pre_comm_connect)/pre_comm_connect)
+dat_out = round(dat_out, 2)
+dat_out
+
+```
+##############
+Improve health outcomes?
+################
+On.a.scale.of.1.to.5..how.important.are.safe.ways.to.walk.and.bike..e.g..sidewalks..bike.lanes..to.your.physical.health.
+physical_safe
+```{r}
+dat_pre = subset(elevate_dat_analysis_complete, pre_post == "Pre")
+pre_physical_safe = mean(dat_pre$physical_safe)
+
+dat_post = subset(elevate_dat_analysis_complete, pre_post == "Post")
+post_physical_safe = mean(dat_post$physical_safe)
+
+dat_out = data.frame(pre_physical_safe, post_physical_safe, p_change_physical_safe = (post_physical_safe-pre_physical_safe)/pre_physical_safe)
+dat_out = round(dat_out, 2)
+dat_out
+
+```
+####################
+Demographics
+####################
+```{r}
+describe.factor(elevate_dat_analysis_complete$gender)
+
+describe.factor(elevate_dat_analysis_complete$age)
+ 47.32143+33.92857
+(0-8)/8
+```
+#############
+Qual open ended
+Just get post responses
+#############
+```{r}
+qual_open_post = elevate_dat_analysis_complete %>%
+  filter(pre_post == "Post") %>%
+  select(walk_bike_future_qual)
+write.csv(qual_open_post, "qual_open_post.csv", row.names = FALSE)
+```
 
